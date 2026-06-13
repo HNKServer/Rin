@@ -10,15 +10,28 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     );
 }
 
+pub fn region_from_lang(lang: &str) -> Region {
+    let normalized = lang.trim().replace('_', "-").to_ascii_uppercase();
+    match normalized.as_str() {
+        "JP" | "JA" | "JA-JP" | "JAPANESE" => Region::Jp,
+        "KR" | "KO" | "KO-KR" | "KOREAN" => Region::Kr,
+        "ZH" | "ZH-CHT" | "ZH-HANT" | "ZH-TW" | "ZH-HK" | "ZH-MO" | "TC" | "TRADITIONAL-CHINESE" => Region::ZhCht,
+        _ => Region::En,
+    }
+}
+
+pub fn canonical_lang(lang: &str) -> &'static str {
+    match region_from_lang(lang) {
+        Region::Jp => "JP",
+        Region::En => "EN",
+        Region::Kr => "KR",
+        Region::ZhCht => "ZH",
+    }
+}
+
 async fn mst(req: HttpRequest) -> impl Responder {
     let lang = req.match_info().get("LANG").unwrap_or("JP");
-
-    let region = match lang.to_ascii_uppercase().as_str() {
-        "JP" => Region::Jp,
-        _    => Region::En, // idk
-    };
-
-    let body = get_all(region);
+    let body = get_all(region_from_lang(lang));
     let body = jzon::stringify(body);
     HttpResponse::Ok()
         .insert_header(("content-type", ContentType::json()))

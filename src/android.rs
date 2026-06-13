@@ -31,6 +31,8 @@ pub extern "system" fn Java_one_ethanthesleepy_androidew_BackgroundService_start
     mut unowned_env: EnvUnowned<'local>,
     _class: JClass<'local>,
     data_path: JString<'local>,
+    asset_path: JString<'local>,
+    masterdata_path: JString<'local>,
     easter: bool,
 ) -> jstring {
     crate::runtime::set_easter_mode(easter);
@@ -38,7 +40,11 @@ pub extern "system" fn Java_one_ethanthesleepy_androidew_BackgroundService_start
     unowned_env
         .with_env(|env: &mut Env<'local>| -> jni::errors::Result<jstring> {
             let data_path: String = data_path.to_string();
+            let asset_path: String = asset_path.to_string();
+            let masterdata_path: String = masterdata_path.to_string();
             crate::runtime::update_data_path(&data_path);
+            crate::runtime::update_asset_path(&asset_path);
+            crate::runtime::update_masterdata_path(&masterdata_path);
 
             let output = JString::from_str(env, "Azunyannnn~")?;
 

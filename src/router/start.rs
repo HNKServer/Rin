@@ -22,7 +22,15 @@ fn get_asset_hash(req: &HttpRequest, body: &JsonValue) -> String {
 
     println!("Login on platform: {}", platform);
 
-    global::get_asset_hash(&body["asset_version"].to_string(), platform).unwrap()
+    let lang = body["language"].as_str()
+        .or_else(|| body["lang"].as_str())
+        .or_else(|| body["locale"].as_str())
+        .or_else(|| req.headers().get("aoharu-language").and_then(|v| v.to_str().ok()))
+        .unwrap_or("EN");
+
+    global::get_asset_hash_for_lang(&body["asset_version"].to_string(), platform, lang)
+        .or_else(|| global::get_asset_hash(&body["asset_version"].to_string(), platform))
+        .unwrap()
 }
 
 async fn asset_hash(req: HttpRequest, body: String) -> impl Responder {

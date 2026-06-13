@@ -49,8 +49,12 @@ impl AssetHashes {
             ("JP", "Android") => (self.android, args.jp_android_asset_hash.as_str()),
             ("JP", "iOS")     => (self.ios,     args.jp_ios_asset_hash.as_str()),
             ("JP", "Windows") => (self.windows, args.windows_asset_hash.as_str()),
-            ("GL", "Android") => (self.android, args.en_android_asset_hash.as_str()),
-            ("GL", "iOS")     => (self.ios,     args.en_ios_asset_hash.as_str()),
+            ("GL", "Android") | ("EN", "Android") => (self.android, args.en_android_asset_hash.as_str()),
+            ("GL", "iOS") | ("EN", "iOS")          => (self.ios,     args.en_ios_asset_hash.as_str()),
+            ("ZH", "Android") => (self.android, if !args.zh_android_asset_hash.is_empty() { args.zh_android_asset_hash.as_str() } else { args.en_android_asset_hash.as_str() }),
+            ("ZH", "iOS")     => (self.ios,     if !args.zh_ios_asset_hash.is_empty() { args.zh_ios_asset_hash.as_str() } else { args.en_ios_asset_hash.as_str() }),
+            ("KR", "Android") => (self.android, if !args.kr_android_asset_hash.is_empty() { args.kr_android_asset_hash.as_str() } else { args.en_android_asset_hash.as_str() }),
+            ("KR", "iOS")     => (self.ios,     if !args.kr_ios_asset_hash.is_empty() { args.kr_ios_asset_hash.as_str() } else { args.en_ios_asset_hash.as_str() }),
             _                 => return None,
         };
 
@@ -69,9 +73,9 @@ impl AssetHashes {
             ("JP", "Android") => (self.version_android, ""),
             ("JP", "iOS")     => (self.version_ios,     ""),
             ("JP", "Windows") => (self.version_windows, args.windows_asset_version.as_str()),
-            ("GL", "Android") => (self.version_android, ""),
-            ("GL", "iOS")     => (self.version_ios,     ""),
-            ("GL", "Windows") => (self.version_windows, ""),
+            ("GL", "Android") | ("EN", "Android") | ("ZH", "Android") | ("KR", "Android") => (self.version_android, ""),
+            ("GL", "iOS") | ("EN", "iOS") | ("ZH", "iOS") | ("KR", "iOS") => (self.version_ios,     ""),
+            ("GL", "Windows") | ("EN", "Windows") | ("ZH", "Windows") | ("KR", "Windows") => (self.version_windows, ""),
             _                 => return None,
         };
 
@@ -126,6 +130,21 @@ pub fn get_asset_hash(asset_version: &str, platform: &str) -> Option<String> {
     let rv = hashes.resolve(platform, region, easter_hash);
     println!("Get asset hash: {platform}. {rv:?}");
     return rv;
+}
+
+
+pub fn get_asset_hash_for_lang(asset_version: &str, platform: &str, lang: &str) -> Option<String> {
+    let region = match crate::router::master_data::canonical_lang(lang) {
+        "ZH" => "ZH",
+        "KR" => "KR",
+        "JP" => "JP",
+        _ => "EN",
+    };
+    if region == "JP" {
+        return get_asset_hash(asset_version, platform);
+    }
+    let (_, hashes) = ASSET_TABLE.iter().find(|(r, _)| *r == "GL")?;
+    hashes.resolve(platform, region, None)
 }
 
 pub fn create_token() -> String {

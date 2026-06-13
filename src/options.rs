@@ -32,6 +32,9 @@ pub struct Args {
     #[arg(long, default_value = "", help = "Link to asset server.")]
     pub assets_url: String,
 
+    #[arg(long, default_value = "./assets", help = "Path to the local CDN asset root. JP layout: {Android,iOS}/{hash}/{file}; GL layout: {Android,iOS}/{EN,KR,ZH}/{hash}/{file}.")]
+    pub asset_path: String,
+
     #[arg(long, default_value_t = 0, help = "Max time returned by the server, in the JSON \"timestamp\" key.")]
     pub max_time: u64,
 
@@ -55,6 +58,18 @@ pub struct Args {
 
     #[arg(long, default_value = "", help = "Asset hash for English Android client.")]
     pub en_android_asset_hash: String,
+
+    #[arg(long, default_value = "", help = "Asset hash for Traditional Chinese Android client. Falls back to English Android hash when empty.")]
+    pub zh_android_asset_hash: String,
+
+    #[arg(long, default_value = "", help = "Asset hash for Traditional Chinese iOS client. Falls back to English iOS hash when empty.")]
+    pub zh_ios_asset_hash: String,
+
+    #[arg(long, default_value = "", help = "Asset hash for Korean Android client. Falls back to English Android hash when empty.")]
+    pub kr_android_asset_hash: String,
+
+    #[arg(long, default_value = "", help = "Asset hash for Korean iOS client. Falls back to English iOS hash when empty.")]
+    pub kr_ios_asset_hash: String,
 
     #[arg(long, default_value = "", help = "Asset hash for JP Android client.")]
     pub jp_android_asset_hash: String,

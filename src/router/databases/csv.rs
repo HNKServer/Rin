@@ -1,19 +1,20 @@
 use jzon::{array, object, JsonValue};
 use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::sync::Mutex;
 
 use include_dir::{include_dir, Dir};
 
 use crate::include_file;
 
-static MASTERDATA_JP: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/router/databases/csv");
-static MASTERDATA_EN: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/router/databases/csv-en");
+static MASTERDATA_ROOT: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/router/databases");
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Region {
     Jp,
     En,
+    Kr,
+    ZhCht,
 }
 
 lazy_static! {
@@ -26,35 +27,47 @@ lazy_static! {
     ).expect("schemas.json is malformed");
 }
 
-fn dir_for(region: Region) -> &'static Dir<'static> {
+fn region_subdirs(region: Region) -> &'static [&'static str] {
     match region {
-        Region::Jp => &MASTERDATA_JP,
-        Region::En => &MASTERDATA_EN,
+        Region::Jp => &["csv"],
+        Region::En => &["csv-en"],
+        Region::Kr => &["csv-kr", "csv-en"],
+        Region::ZhCht => &["csv-zh-cht", "csv-zh", "csv-en"],
     }
 }
 
-fn region_subdir(region: Region) -> &'static str {
-    match region {
-        Region::Jp => "csv",
-        Region::En => "csv-en",
+fn bundled_csv_bytes(region: Region, name: &str) -> Option<Vec<u8>> {
+    for subdir in region_subdirs(region) {
+        let rel = format!("{}/{}.csv", subdir, name);
+        if let Some(file) = MASTERDATA_ROOT.get_file(rel) {
+            return Some(file.contents().to_vec());
+        }
     }
+    None
+}
+
+fn bundled_table_names(region: Region) -> BTreeSet<String> {
+    let mut names = BTreeSet::new();
+    for subdir in region_subdirs(region) {
+        if let Some(dir) = MASTERDATA_ROOT.get_dir(subdir) {
+            for file in dir.files() {
+                if let Some(stem) = file.path().file_stem().and_then(|s| s.to_str()) {
+                    if !stem.is_empty() {
+                        names.insert(stem.to_owned());
+                    }
+                }
+            }
+        }
+    }
+    names
 }
 
 pub fn get_all(region: Region) -> JsonValue {
     let mut rv = object!{};
 
-    for file in dir_for(region).files() {
-        let table_name = file.path()
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or_default();
-
-        if table_name.is_empty() {
-            continue;
-        }
-
-        if let Some(bytes) = csv_bytes(region, table_name) {
-            rv[table_name] = String::from_utf8(bytes).unwrap_or_default().into();
+    for table_name in bundled_table_names(region) {
+        if let Some(bytes) = csv_bytes(region, &table_name) {
+            rv[table_name.as_str()] = String::from_utf8(bytes).unwrap_or_default().into();
         }
     }
 
@@ -62,13 +75,15 @@ pub fn get_all(region: Region) -> JsonValue {
 }
 
 pub fn csv_bytes(region: Region, name: &str) -> Option<Vec<u8>> {
-    let rel = format!("{}/{}.csv", region_subdir(region), name);
-    if let Some(bytes) = crate::runtime::read_masterdata_file(&rel) {
-        return Some(bytes);
+    // External runtime masterdata has priority. This makes AndroidEw's optional
+    // masterdata picker an override, not a required setting.
+    for subdir in region_subdirs(region) {
+        let rel = format!("{}/{}.csv", subdir, name);
+        if let Some(bytes) = crate::runtime::read_masterdata_file(&rel) {
+            return Some(bytes);
+        }
     }
-    dir_for(region)
-        .get_file(format!("{name}.csv"))
-        .map(|f| f.contents().to_vec())
+    bundled_csv_bytes(region, name)
 }
 
 pub fn table(region: Region, name: &str) -> JsonValue {

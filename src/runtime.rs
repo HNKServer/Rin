@@ -8,6 +8,7 @@ lazy_static! {
     static ref RUNNING: RwLock<bool> = RwLock::new(false);
     static ref DATAPATH: RwLock<String> = RwLock::new(String::new());
     static ref MASTERDATA_PATH: RwLock<String> = RwLock::new(String::new());
+    static ref ASSET_PATH: RwLock<String> = RwLock::new(String::from("assets"));
     static ref MASTERDATA_WARNED: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
     static ref MOD_PATHS: RwLock<Vec<String>> = RwLock::new(Vec::new());
     static ref EASTER: RwLock<bool> = RwLock::new(false);
@@ -36,6 +37,20 @@ pub fn get_data_path(file_name: &str) -> String {
 pub fn update_data_path(path: &str) {
     let mut w = DATAPATH.write().unwrap();
     *w = path.to_string();
+}
+
+pub fn update_asset_path(path: &str) {
+    let trimmed = path.trim_end_matches('/').to_string();
+    let mut w = ASSET_PATH.write().unwrap();
+    if trimmed.is_empty() {
+        *w = String::from("assets");
+    } else {
+        *w = trimmed;
+    }
+}
+
+pub fn get_asset_path() -> String {
+    ASSET_PATH.read().unwrap().clone()
 }
 
 pub fn update_masterdata_path(path: &str) {

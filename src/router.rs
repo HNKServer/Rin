@@ -28,7 +28,7 @@ pub mod databases;
 pub mod location;
 pub mod event_ranking;
 pub mod asset_lists;
-mod master_data;
+pub mod master_data;
 
 use actix_web::{
     HttpResponse,
