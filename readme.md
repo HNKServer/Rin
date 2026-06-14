@@ -15,13 +15,21 @@ All for ZH language support and convenience.
 
 ## Usage
 
-Select the decompressed ZH-CHT data packs' root path at CDN configuration in the settings, then just start the server.
+### Playing with EN/JP
 
-Make sure also to modify sif2-gl client's CDN settings to match the server's.
+Just follow the original project instructions. This modified version server is also compatible with the original versions of clients.
 
-在设置的CDN配置中选择繁体中文数据包解压后的根目录然后启动服务器即可。
+只需遵从原始项目的引导提示即可。修改版服务端依旧兼容各个原始版本的客户端。
 
-确保你同时修改 sif2 国际服客户端版本中的 CDN 设置以匹配服务端。
+### Playing with ZH-CHT
+
+Give the decompressed ZH-CHT data packs' root path at CDN configuration in the parameters, then start the server.
+
+Make sure also to modify sif2-gl client's CDN settings to match the server's. The original version of global client isn't compatible with ZH-CHT.
+
+在设置 CDN 参数时给出繁体中文数据包解压后的根目录，然后启动服务器。
+
+确保你同时修改 sif2 国际服客户端版本中的 CDN 设置以匹配服务端。原始版本的国际版客户端不支持繁体中文。
 
 ## Other files required
 
