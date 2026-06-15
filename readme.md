@@ -5,13 +5,13 @@ A (mostly functioning) server for Love Live! School idol festival 2 MIRACLE LIVE
 
 ## Overview
 
-Basically just the original ew with ZH-CHT support.
+Basically just the original ew with ZH-CHT WebUI support.
 
 All for ZH language support and convenience.
 
-基本上就是原版的 AndroidEw 加上了繁体中文语言包支持。
+基本上就是原版的 ew 加上了繁体中文语言包的后台管理界面支持。
 
-一切都是为了支持中文语言包和便捷。
+一切都是为了支持中文和便捷。
 
 ## Usage
 
