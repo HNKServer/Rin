@@ -3,8 +3,4 @@
 	url = https://github.com/HNKServer/sif2-runtime-files
 [submodule "webui"]
 	path = webui
-<<<<<<< HEAD
 	url = https://gitub.com/HNKServer/ew-webui
-=======
-	url = https://gitub.com/HNKServer/ew-webui
->>>>>>> 731427d18a04f8ff3515225985d4d2c7bcb53304
